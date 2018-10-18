@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"testGoProject/stringutil"
 )
 
 type Todo struct{
@@ -83,4 +84,5 @@ func main(){
 	//http.Handle("/static", http.StripPrefix("/static", fs))
 
 	http.ListenAndServe(":8010", r)
+	fmt.Printf("%s", stringutil.Reverse("hello there"));
 }
