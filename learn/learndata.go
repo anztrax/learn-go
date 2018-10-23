@@ -226,9 +226,33 @@ func TryInterface2(){
 }
 
 
-func hello(){
+func hello(done chan bool){
 	fmt.Println("Hello world goroutine")
+	time.Sleep(2 * time.Second) //this will block hello process
+	fmt.Println("Hello go routine awake and going to write to done")
+	done <- true
 }
+
+func calcSquares(number int, sequreOp chan int){
+	sum := 0
+	for number != 0{
+		digit := number % 10
+		sum += digit * digit
+		number /= 10
+	}
+	sequreOp <- sum
+}
+
+func calcCubes(number int, cubeop chan int) {
+	sum := 0
+	for number != 0 {
+		digit := number % 10
+		sum += digit * digit * digit
+		number /= 10
+	}
+	cubeop <- sum
+}
+
 
 func numbers(){
 	for i := 1; i <= 5; i++{
@@ -244,19 +268,48 @@ func alphabets(){
 	}
 }
 
-func TryGoConcurrency(){
-	go hello()
-	time.Sleep(1000 * time.Millisecond)	//this is hack , using timer for halt the main thread process
-	go numbers()
-	go alphabets()
-	time.Sleep(3000 * time.Millisecond)
-	fmt.Println("try go concurrency")
+//unidirectional data channel
+func sendData(sendch chan <- int){
+	sendch <- 10
+}
 
-	var a chan int
-	if a == nil{
-		fmt.Println("channel a is nil, going to define it")
-		a = make(chan int)
-		fmt.Printf("Type of a is %T", a)
+func goRoutineProducer(chnl chan int){
+	for i:=0; i < 10; i++{
+		time.Sleep(400 * time.Millisecond)
+		chnl <- i
+	}
+	close(chnl)
+}
+
+func TryGoConcurrency(){
+	done := make(chan bool)
+	go hello(done)
+	<- done
+
+	numberValue := 589
+	sqrch := make(chan int)
+	cubech := make(chan int)
+	go calcSquares(numberValue, sqrch)
+	go calcCubes(numberValue, cubech)
+	squares, cubes := <- sqrch, <- cubech
+	fmt.Println("final output", squares + cubes)
+	fmt.Println("main function")
+
+	//single channel concurrency
+	sendch := make(chan int)
+	go sendData(sendch)
+	fmt.Println("value from channel : ", <-sendch)
+
+
+	//get data from goroutine producer
+	channel1 := make(chan int)
+	go goRoutineProducer(channel1)
+	for {
+		v, ok := <- channel1
+		if ok == false{
+			break;
+		}
+		fmt.Println("Received", v,ok)
 	}
 }
 
