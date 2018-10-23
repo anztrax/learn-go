@@ -19,7 +19,8 @@ func main() {
 	//learn.TryInterface2()
 	//learn.TryGoConcurrency()
 	//learn.TryGoBufferChannel()
-	learn.TryLearnWorkerPool()
+	//learn.TryLearnWorkerPool()
+	learn.TrySelect()
 }
 
 func tryMakeSpec(){

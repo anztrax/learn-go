@@ -440,6 +440,49 @@ func TryLearnWorkerPool(){
 	fmt.Println("total time taken ", diff.Seconds(), "seconds")
 }
 
+
+func server1(ch chan string){
+	time.Sleep(3 * time.Second)
+	ch <- "from server 1"
+}
+
+func server2(ch chan string){
+	time.Sleep(3 * time.Second)
+	ch <- "from Server 2"
+}
+
+func processHeavyData(ch chan string){
+	time.Sleep(10500 * time.Millisecond)
+	ch <- "process successful"
+}
+
+func TrySelect(){
+	output1 := make(chan string)
+	output2 := make(chan string)
+	go server1(output1)
+	go server2(output2)
+	select {
+		case s1 := <- output1:
+			fmt.Println(s1)
+		case s2 := <- output2:
+			fmt.Println(s2)
+	}
+
+	//try process heavy data
+	ch := make(chan string)
+	go processHeavyData(ch)
+	for{
+		time.Sleep(1000 * time.Millisecond)
+		select{
+			case v := <- ch:
+				fmt.Println("received value : ", v)
+				return
+			default:
+				fmt.Println("no value received")
+		}
+	}
+}
+
 func allPersonSalary(personSallaries map[string]int){
 	fmt.Println("=========================")
 	fmt.Println("total length of persons : ", len(personSallaries))
