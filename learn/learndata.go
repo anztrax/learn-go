@@ -2,6 +2,8 @@ package learn
 
 import (
 	"fmt"
+	"math/rand"
+	"sync"
 	"time"
 )
 
@@ -233,22 +235,31 @@ func hello(done chan bool){
 	done <- true
 }
 
+func digits(number int, channel chan int){
+	for number != 0 {
+		digit := number % 10
+		channel <- digit
+		number /= 10
+	}
+	close(channel)
+}
+
 func calcSquares(number int, sequreOp chan int){
 	sum := 0
-	for number != 0{
-		digit := number % 10
+	dch := make(chan int)
+	go digits(number, dch)
+	for digit := range dch{
 		sum += digit * digit
-		number /= 10
 	}
 	sequreOp <- sum
 }
 
 func calcCubes(number int, cubeop chan int) {
 	sum := 0
-	for number != 0 {
-		digit := number % 10
+	dch := make(chan int)
+	go digits(number, dch)
+	for digit := range dch {
 		sum += digit * digit * digit
-		number /= 10
 	}
 	cubeop <- sum
 }
@@ -311,6 +322,122 @@ func TryGoConcurrency(){
 		}
 		fmt.Println("Received", v,ok)
 	}
+}
+
+func write(ch chan int){
+	for i := 0; i < 5; i++{
+		ch <- i
+		fmt.Println("successfully wrote ", i, " to ch")
+	}
+	close(ch)
+}
+
+func process(i int, wg *sync.WaitGroup){
+	fmt.Println("started Goroutine", i)
+	time.Sleep(2 * time.Second)
+	fmt.Printf("Goroutine %d ended\n", i)
+	wg.Done()
+}
+
+func TryGoBufferChannel(){
+	ch := make(chan string, 2)
+	ch <- "naveen"
+	ch <- "paul"
+	fmt.Println(<- ch)
+	fmt.Println(<- ch)
+
+	//buffered channel
+	ch2 := make(chan int, 2)
+	go write(ch2)
+	time.Sleep(2 * time.Second)
+	for v := range ch2{
+		fmt.Println("read value ", v , " from ch")
+		time.Sleep(2 * time.Second)
+	}
+
+	//try wait group
+	no := 3
+	var wg sync.WaitGroup
+	for i := 0; i < no; i++{
+		wg.Add(1)
+		go process(i, &wg)
+	}
+	wg.Wait()
+	fmt.Println("All go routines finished executing")
+}
+
+type Job struct{
+	id int
+	randomno int
+}
+type Result struct{
+	job Job
+	sumofdigits int
+}
+
+var jobs = make(chan Job, 10)
+var results = make(chan Result, 10)
+
+func digits2(number int) int{
+	sum := 0
+	no := number
+	for no != 0{
+		digit := no % 10
+		sum += digit
+		no /= 10
+	}
+	time.Sleep(2 * time.Second)
+	return sum
+}
+
+func worker(wg *sync.WaitGroup){
+	for job := range jobs{
+		output := Result{ job, digits2(job.randomno)}
+		results <- output
+	}
+	wg.Done()
+}
+
+func createWorkerPool(noOfWorkers int){
+	var wg sync.WaitGroup
+	for i := 0; i < noOfWorkers; i++{
+		wg.Add(1)
+		go worker(&wg)
+	}
+	wg.Wait()
+	close(results)
+}
+
+func allocate(numOfJobs int){
+	for i :=0; i < numOfJobs; i++{
+		randomNo := rand.Intn(99)
+		job := Job{id : i, randomno : randomNo}
+		jobs <- job
+	}
+	close(jobs)
+}
+
+func result(done chan bool){
+	for result := range results{
+		fmt.Printf("job id %d input random no %d , sum of digits %d\n", result.job.id, result.job.randomno, result.sumofdigits)
+	}
+	done <- true
+}
+
+func TryLearnWorkerPool(){
+	startTime := time.Now()
+	noOfJobs := 20
+	go allocate(noOfJobs)
+
+	done := make(chan bool)
+	go result(done)
+
+	noOfWorkers := 10
+	createWorkerPool(noOfWorkers)
+	<- done
+	endTime := time.Now()
+	diff := endTime.Sub(startTime)
+	fmt.Println("total time taken ", diff.Seconds(), "seconds")
 }
 
 func allPersonSalary(personSallaries map[string]int){
