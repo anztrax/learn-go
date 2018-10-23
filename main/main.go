@@ -4,19 +4,20 @@ import (
 	"fmt"
 	"testGoProject/learn"
 	"testGoProject/structs/computer"
-	"testGoProject/trygoroutines"
 )
 
 func main() {
-	trygoroutines.Say()
-	trygoroutines.Sum()
-	TryBufferChannel()
-	tryFibonaci()
-	findInData()
-	learn.TryMaps()
-	learn.TryStruct()
-	tryMakeSpec()
-	learn.TryInterface1()
+	//trygoroutines.Say()
+	//trygoroutines.Sum()
+	//TryBufferChannel()
+	//tryFibonaci()
+	//findInData()
+	//learn.TryMaps()
+	//learn.TryStruct()
+	//tryMakeSpec()
+	//learn.TryInterface1()
+	//learn.TryInterface2()
+	learn.TryGoConcurrency()
 }
 
 func tryMakeSpec(){

@@ -1,6 +1,9 @@
 package learn
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type Address struct {
 	city, state string
@@ -181,10 +184,81 @@ func TryInterface1(){
 
 }
 
-func tryInterface2(){
-
+type SalaryCalculator2 interface {
+	DisplaySalary2()
+}
+type LeaveCalculator interface {
+	CalculatorLeavesLeft() int
 }
 
+type EmployeeOperations interface {
+	SalaryCalculator2
+	LeaveCalculator
+}
+
+type Employee2 struct{
+	firstName string
+	lastName string
+	basicPay int
+	totalLeaves int
+	leavesTaken int
+}
+func(e Employee2) DisplaySalary2() {
+	fmt.Printf("%s %s has salary $%d", e.firstName, e.lastName, e.basicPay)
+}
+
+func(e Employee2) CalculatorLeavesLeft() int{
+	return e.totalLeaves - e.leavesTaken
+}
+
+
+func TryInterface2(){
+	em1 := Employee2{
+		firstName:"bon",
+		lastName: "jovi",
+		basicPay: 100,
+		totalLeaves: 10,
+		leavesTaken: 5,
+	}
+	var empOp1 EmployeeOperations = em1
+	empOp1.DisplaySalary2()
+	fmt.Println("\nLeaves left =", empOp1.CalculatorLeavesLeft())
+}
+
+
+func hello(){
+	fmt.Println("Hello world goroutine")
+}
+
+func numbers(){
+	for i := 1; i <= 5; i++{
+		time.Sleep(250 * time.Millisecond)
+		fmt.Printf("%d ", i)
+	}
+}
+
+func alphabets(){
+	for i := 'a'; i <= 'e'; i++{
+		time.Sleep(400 * time.Millisecond)
+		fmt.Printf("%c ", i)
+	}
+}
+
+func TryGoConcurrency(){
+	go hello()
+	time.Sleep(1000 * time.Millisecond)	//this is hack , using timer for halt the main thread process
+	go numbers()
+	go alphabets()
+	time.Sleep(3000 * time.Millisecond)
+	fmt.Println("try go concurrency")
+
+	var a chan int
+	if a == nil{
+		fmt.Println("channel a is nil, going to define it")
+		a = make(chan int)
+		fmt.Printf("Type of a is %T", a)
+	}
+}
 
 func allPersonSalary(personSallaries map[string]int){
 	fmt.Println("=========================")
