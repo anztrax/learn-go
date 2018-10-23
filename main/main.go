@@ -1,40 +1,84 @@
 package main
 
 import (
-	"github.com/ungerik/go-cairo"
-	"image"
-	_ "image/jpeg"
-	"net/http"
+	"fmt"
+	"testGoProject/learn"
+	"testGoProject/structs/computer"
+	"testGoProject/trygoroutines"
 )
 
-func decodeBase64() image.Image{
-	res, err := http.Get("https://tvlk.imgix.net/imageResource/2018/10/15/1539606255527-bc6318215478e9e8a66ba763a7605bea.png?auto=compress%2Cformat&cs=srgb&fm=png&ixlib=java-1.1.12&q=75");
-	if err != nil || res.StatusCode != 200 {
-		// handle errors
-		panic("can't get image")
-	}
-	defer res.Body.Close()
-	m, _, err := image.Decode(res.Body)
-	if err != nil {
-		// handle error
-
-		panic("can't get image")
-	}
-	return m
-}
-
-func createImage(){
-	surface := cairo.NewSurface(cairo.FORMAT_ARGB32, 6000, 6000)
-	surface.SelectFontFace("serif", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-	surface.SetFontSize(32.0)
-	surface.SetSourceRGB(0.0, 0.0, 1.0)
-	surface.MoveTo(10.0, 50.0)
-	surface.ShowText("Hello World")
-	surface.SetImage(decodeBase64());
-	surface.WriteToPNG("hello.png")
-	surface.Finish()
-}
-
 func main() {
-	createImage()
+	trygoroutines.Say()
+	trygoroutines.Sum()
+	TryBufferChannel()
+	tryFibonaci()
+	findInData()
+	learn.TryMaps()
+	learn.TryStruct()
+	tryMakeSpec()
+	learn.TryInterface1()
+}
+
+func tryMakeSpec(){
+	var spec computer.Spec
+	spec.Maker = "apple"
+	spec.Price = 50000
+	fmt.Println("Spec : ", spec)
+}
+
+//try variadic functions
+func find(num int, nums ...int){
+	fmt.Printf("type of nums is %T\n", nums)
+	found := false
+	for i, v := range nums{
+		if v == num{
+			fmt.Println(num, "found at index", i, "in" , nums)
+			found = true
+		}
+	}
+
+	if !found{
+		fmt.Println(num, "not found in ", nums)
+	}
+	fmt.Printf("\n")
+}
+
+func findInData(){
+	find(20, 100, 300, 400, 20)
+	find(200, 2000, 10)
+
+	nums := []int{80, 90, 95}
+	find(89, nums...)
+	change([]string{"hello", "there"}...)
+}
+
+func change(s ...string){
+	s[0] = "go"
+	s = append(s, "playground")
+	fmt.Println(s)
+}
+
+func TryBufferChannel(){
+	ch := make(chan int, 2)
+	ch <- 1
+	ch <- 2
+	fmt.Println("value from channel : ", <- ch)
+	fmt.Println("value from channel : ", <- ch)
+}
+
+func fibonacci(n int,c chan int){
+	x, y := 0, 1
+	for i := 0; i < n; i++{
+		c <- x
+		x, y = y, x + y
+	}
+	close(c)
+}
+
+func tryFibonaci(){
+	c := make(chan int, 10)
+	go fibonacci(cap(c), c)
+	for i := range c{
+		fmt.Println(i)
+	}
 }
