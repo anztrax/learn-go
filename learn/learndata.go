@@ -484,19 +484,33 @@ func TrySelect(){
 }
 
 var x = 0;
-func increment(wg *sync.WaitGroup){
+func increment(wg *sync.WaitGroup,  m *sync.Mutex){
+	m.Lock()
 	x = x + 1
+	m.Unlock()
+	wg.Done()
+}
+
+var x1 = 0;
+func incrementUsingChannel(wg *sync.WaitGroup, ch chan bool){
+	ch <- true
+	x1 = x1 + 1
+	<- ch
 	wg.Done()
 }
 
 func TryMutex(){
 	var wg sync.WaitGroup
+	var m sync.Mutex
+	ch := make(chan bool, 1)
 	for i := 0; i < 1000 ; i++{
-		wg.Add(1)
-		go increment(&wg)
+		wg.Add(2)
+		go increment(&wg, &m)
+		go incrementUsingChannel(&wg, ch)
 	}
 	wg.Wait()
 	fmt.Println("final value of  x", x)
+	fmt.Println("final value of x1", x1)
 }
 
 func allPersonSalary(personSallaries map[string]int){
