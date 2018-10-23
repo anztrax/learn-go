@@ -20,7 +20,8 @@ func main() {
 	//learn.TryGoConcurrency()
 	//learn.TryGoBufferChannel()
 	//learn.TryLearnWorkerPool()
-	learn.TrySelect()
+	//learn.TrySelect()
+	learn.TryMutex()
 }
 
 func tryMakeSpec(){
