@@ -23,10 +23,13 @@ func main() {
 	//learn.TryGoBufferChannel()
 	//learn.TryLearnWorkerPool()
 	//learn.TrySelect()
-	learn.TryMutex()
-	tryDataFromPackage()
-	learn.TryUsingComposition()
-	learn.TryStackOfDefer()
+	//learn.TryMutex()
+	//tryDataFromPackage()
+	//learn.TryUsingComposition()
+	//learn.TryStackOfDefer()
+
+	//error handling example
+	learn.TryErrorHandling()
 }
 
 func tryDataFromPackage(){

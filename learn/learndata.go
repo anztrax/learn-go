@@ -2,7 +2,11 @@ package learn
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
+	"net"
+	"os"
+	"path/filepath"
 	"sync"
 	"time"
 )
@@ -586,27 +590,25 @@ type rect struct{
 	width int
 }
 func(r rect)area(wg *sync.WaitGroup){
+	defer wg.Done()
 	if r.length < 0{
 		fmt.Printf("rect %v's length should be greater than zero\n", r)
-		wg.Done()
 		return
 	}
 
 	if r.width < 0{
 		fmt.Printf("rect %v's width should be greater than zero\n", r)
-		wg.Done()
 		return
 	}
 
 	area := r.length * r.width
 	fmt.Printf("area %v's area %d\n",r, area)
-	wg.Done()
 }
 
 func TryStackOfDefer(){
 	name := "naveen"
-	fmt.Printf("Original String : %s\n", string(name))
-	fmt.Printf("Reversed string : ")
+	defer fmt.Printf("Original String : %s\n\n", string(name))
+	defer fmt.Printf("Reversed string : ")
 	for _, v := range []rune(name){
 		defer fmt.Printf("%c", v)
 	}
@@ -626,6 +628,58 @@ func TryStackOfDefer(){
 	fmt.Println("All go routines finished executing")
 }
 
+type areaError struct{
+	err string
+	radius float64
+}
+func(e *areaError) Error()string{
+	return fmt.Sprintf("radius %0.2f : %s", e.radius,e.err)
+}
+
+//custom error
+func circleArea(radius float64)(float64, error){
+	if radius <0 {
+		return 0, fmt.Errorf("Area calculation failed, radius %0.2f is less than zero", radius)
+	}
+	return math.Pi * radius * radius, nil
+}
+
+func TryErrorHandling(){
+	f, err := os.Open("/test.txt")
+	if err != nil{
+		fmt.Println(err.(*os.PathError))
+	}else {
+		fmt.Println(f.Name(), "opened successfully")
+	}
+
+
+	//try error dns loopkup
+	addr, err := net.LookupHost("traveloka111.com")
+	if err, ok := err.(*net.DNSError); ok{
+		if err.Timeout(){
+			fmt.Println("operation timed out")
+		}else if err.Temporary(){
+			fmt.Println("temporary error")
+		}else{
+			fmt.Println("generic error : ", err)
+		}
+	}else{
+		fmt.Println(addr)
+	}
+
+	files, _ := filepath.Glob("[")
+	fmt.Println("matched files", files)
+
+
+	//try using custom error
+	radius := -20.0
+	area, err := circleArea(radius)
+	if err != nil{
+		fmt.Println(err)
+		return
+	}
+	fmt.Printf("Area of circle %0.2f", area)
+}
 
 func allPersonSalary(personSallaries map[string]int){
 	fmt.Println("=========================")
