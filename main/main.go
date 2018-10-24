@@ -26,6 +26,7 @@ func main() {
 	learn.TryMutex()
 	tryDataFromPackage()
 	learn.TryUsingComposition()
+	learn.TryStackOfDefer()
 }
 
 func tryDataFromPackage(){
