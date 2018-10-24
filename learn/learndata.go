@@ -2,7 +2,6 @@ package learn
 
 import (
 	"fmt"
-	"math"
 	"math/rand"
 	"net"
 	"os"
@@ -630,18 +629,39 @@ func TryStackOfDefer(){
 
 type areaError struct{
 	err string
-	radius float64
+	length float64
+	width float64
 }
 func(e *areaError) Error()string{
-	return fmt.Sprintf("radius %0.2f : %s", e.radius,e.err)
+	return e.err
+}
+func(e *areaError) lengthNegative() bool{
+	return e.length < 0
+}
+func(e *areaError) widthNegative() bool{
+	return e.width < 0
 }
 
+
 //custom error
-func circleArea(radius float64)(float64, error){
-	if radius <0 {
-		return 0, fmt.Errorf("Area calculation failed, radius %0.2f is less than zero", radius)
+func rectArea(length, width float64)(float64, error){
+	err := ""
+	if length < 0 {
+		err += "length is less than zero"
 	}
-	return math.Pi * radius * radius, nil
+	if width < 0{
+		if err == "" {
+			err = "width is less than zero"
+		}else{
+			err += ", width is less than zero"
+		}
+	}
+
+	if err != "" {
+		return 0, &areaError{err, length, width}
+	}
+
+	return length * width, nil
 }
 
 func TryErrorHandling(){
@@ -672,13 +692,69 @@ func TryErrorHandling(){
 
 
 	//try using custom error
-	radius := -20.0
-	area, err := circleArea(radius)
+	length, width := -5.0, -9.0
+	area, err := rectArea(length, width)
 	if err != nil{
+		if err, ok := err.(*areaError); ok{
+			if err.lengthNegative(){
+				fmt.Printf("error: length %0.2f is less than zero\n", err.length)
+			}
+			if err.widthNegative() {
+				fmt.Printf("error: width %0.2f is less than zero\n", err.width)
+
+			}
+			return
+		}
 		fmt.Println(err)
 		return
 	}
-	fmt.Printf("Area of circle %0.2f", area)
+	fmt.Printf("Area of rect %0.2f", area)
+}
+
+func recoverName(){
+	if r := recover(); r != nil{
+		fmt.Println("recovered from  : ", r)
+	}
+}
+
+func fullname(firstName *string, lastName *string){
+	defer recoverName()
+	if firstName == nil{
+		panic("runtime error : first name cannot be nil")
+	}
+	if lastName == nil{
+		panic("runtime error : last name cannot be nil")
+	}
+	fmt.Printf("%s %s\n", *firstName, *lastName)
+	fmt.Println("returned normally from fullName")
+}
+
+func recovery(){
+	if r := recover(); r!= nil{
+		fmt.Println("recovered : ",r)
+	}
+}
+
+func aTask(){
+	defer recovery()
+	fmt.Println("inside A")
+	go bTask()
+	time.Sleep(1 * time.Second)
+}
+
+func bTask(){
+	fmt.Println("Inside B")
+	panic("oh! B panicked")
+}
+
+func TryDeferAndPanic(){
+	defer fmt.Println("deferred call in main")
+	firstName := "Elon"
+	fullname(&firstName, nil)
+	fmt.Println("returned normally from main")
+
+	aTask()
+	fmt.Println("normally returned from main")
 }
 
 func allPersonSalary(personSallaries map[string]int){
