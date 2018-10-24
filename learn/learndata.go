@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"sync"
 	"time"
 )
@@ -744,7 +745,21 @@ func aTask(){
 
 func bTask(){
 	fmt.Println("Inside B")
-	panic("oh! B panicked")
+	//panic("oh! B panicked")
+}
+
+func recovery_result(){
+	if r := recover(); r != nil{
+		fmt.Println("Recovered", r)
+		debug.PrintStack()
+	}
+}
+
+func aTaskData(){
+	defer recovery_result()
+	n := []int{5, 7, 4}
+	fmt.Println(n[3])
+	fmt.Println("normally returned from a")
 }
 
 func TryDeferAndPanic(){
@@ -755,7 +770,78 @@ func TryDeferAndPanic(){
 
 	aTask()
 	fmt.Println("normally returned from main")
+
+	aTaskData()
 }
+
+func simpleHOFunc(sum func(a, b int) int){
+	fmt.Println("sum data : ", sum(60,80))
+}
+
+func methodGenerator() func(a, b int) int{
+	f := func(a, b int) int{
+		return a + b
+	}
+	return f
+}
+
+type add func(a int, b int) int
+
+func TryFirstClassFunction(){
+	aFunc := func(){
+		fmt.Println("hello world first class function")
+	}
+	aFunc()
+	fmt.Printf("value of %T", aFunc)
+
+	func(){
+		fmt.Println("inner function")
+	}()
+
+	func(param string){
+		fmt.Println("a parameter string", param)
+	}("hello there")
+
+
+	var aFuncResult add = func(a int, b int) int{
+		return a + b
+	}
+	result1 := aFuncResult(10 , 30)
+	fmt.Println("result :" , result1)
+
+	//high order function
+	simpleHOFunc(func(a, b int) int {
+		return a + b
+	})
+
+	generatedFunc := methodGenerator()
+	fmt.Println("generated function data : ", generatedFunc(60, 7))
+	tryClosureFunc()
+}
+
+func tryClosureFunc(){
+	a := 5
+	func(){
+		fmt.Println("a = ", a)
+	}()
+
+	appendStr := func() func(string) string{
+		t := "hello"
+		c := func(b string)string{
+			t = t + " " + b
+			return t
+		}
+		return c
+	}
+
+	aResult := appendStr()
+	bResult := appendStr()
+	fmt.Println(aResult("world"))
+	fmt.Println(bResult("Everyone"))
+	fmt.Println(aResult("Gopher"))
+	fmt.Println(bResult("!"))
+}
+
 
 func allPersonSalary(personSallaries map[string]int){
 	fmt.Println("=========================")

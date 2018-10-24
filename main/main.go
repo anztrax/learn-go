@@ -31,6 +31,7 @@ func main() {
 	//error handling example
 	learn.TryErrorHandling()
 	learn.TryDeferAndPanic()
+	learn.TryFirstClassFunction()
 }
 
 func tryDataFromPackage(){
