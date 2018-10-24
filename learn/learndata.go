@@ -6,7 +6,6 @@ import (
 	"net"
 	"os"
 	"path/filepath"
-	"runtime/debug"
 	"sync"
 	"time"
 )
@@ -751,7 +750,7 @@ func bTask(){
 func recovery_result(){
 	if r := recover(); r != nil{
 		fmt.Println("Recovered", r)
-		debug.PrintStack()
+		//debug.PrintStack()
 	}
 }
 
@@ -787,6 +786,24 @@ func methodGenerator() func(a, b int) int{
 
 type add func(a int, b int) int
 
+
+//student data
+type student struct{
+	firstName string
+	lastName string
+	grade string
+	country string
+}
+func filterStudent(s []student, f func(student) bool) []student{
+	var result []student
+	for _ ,v := range s{
+		if f(v) == true{
+			result = append(result, v)
+		}
+	}
+	return result
+}
+
 func TryFirstClassFunction(){
 	aFunc := func(){
 		fmt.Println("hello world first class function")
@@ -817,6 +834,42 @@ func TryFirstClassFunction(){
 	generatedFunc := methodGenerator()
 	fmt.Println("generated function data : ", generatedFunc(60, 7))
 	tryClosureFunc()
+
+
+	//test implementation of first class function
+	student1 := student{
+		firstName: "Naveen",
+		lastName: "Ramanathan",
+		country: "India",
+		grade: "A",
+	}
+
+	student2 := student{
+		firstName: "Evalia",
+		lastName: "nissan",
+		grade: "B",
+		country: "Japan",
+	}
+
+	students := []student{student1, student2}
+	gradeAStudent := filterStudent(students, func(data student)bool{
+		return data.grade == "A"
+	})
+	fmt.Printf("grade A student : %v\n", gradeAStudent)
+
+	anIntegers := []int{ 5, 6, 7, 8, 9}
+	multipliedBy5 := iMap(anIntegers, func(data int)int{
+		return data * 5
+	})
+	fmt.Println("values :", multipliedBy5)
+}
+
+func iMap(s []int, f func(int)int) []int{
+	var r []int
+	for _, v := range s{
+		r = append(r, f(v))
+	}
+	return r
 }
 
 func tryClosureFunc(){
