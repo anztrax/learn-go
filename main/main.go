@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"testGoProject/learn"
+	"testGoProject/oop/employee"
+	"testGoProject/oop/manager"
 	"testGoProject/structs/computer"
 )
 
@@ -22,6 +24,21 @@ func main() {
 	//learn.TryLearnWorkerPool()
 	//learn.TrySelect()
 	learn.TryMutex()
+	tryDataFromPackage()
+	learn.TryUsingComposition()
+}
+
+func tryDataFromPackage(){
+	e := employee.Employee{
+		FirstName: "Sam",
+		LastName: "Adolf",
+		TotalLeaves: 30,
+		LeavesTaken: 20,
+	}
+	e.LeavesRemaining()
+
+	manager1 := manager.New("Sam", "Adolf", 30, 20)
+	manager1.LeavesRemaining()
 }
 
 func tryMakeSpec(){

@@ -513,6 +513,74 @@ func TryMutex(){
 	fmt.Println("final value of x1", x1)
 }
 
+//author & post
+//==============
+
+type Author struct{
+	firstName string
+	lastName string
+	bio string
+}
+
+func(a Author) fullName() string{
+	return fmt.Sprintf("%s %s", a.firstName, a.lastName)
+}
+
+type Post struct{
+	title string
+	content string
+	Author
+}
+
+func(p Post) details(){
+	fmt.Println("\n===========")
+	fmt.Println("title : ", p.title)
+	fmt.Println("Content : ", p.content)
+	fmt.Println("Author : ", p.fullName())
+	fmt.Println("Bio : ", p.bio)
+}
+
+
+type Website struct{
+	posts []Post
+}
+func(w Website) contents(){
+	fmt.Println("Contents of website\n")
+	for _, v := range w.posts{
+		v.details()
+		fmt.Println()
+	}
+}
+
+
+func TryUsingComposition(){
+	author1 := Author{
+		firstName: "andrew",
+		lastName: "ananta",
+		bio: "hello there author 1",
+	}
+
+	post1 := Post{
+		title: "post 1",
+		content: "this is post 1, this is used for post data",
+		Author : author1,
+	}
+	post1.details()
+
+	post2 := Post{
+		title: "post 2",
+		content: "this is post 2, this is used for post data",
+		Author : author1,
+	}
+
+
+	posts := []Post{post1, post2}
+	website1 := Website{
+		posts,
+	}
+	website1.contents()
+}
+
 func allPersonSalary(personSallaries map[string]int){
 	fmt.Println("=========================")
 	fmt.Println("total length of persons : ", len(personSallaries))
