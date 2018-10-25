@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"testGoProject/learn"
+	"testGoProject/filehandling"
 	"testGoProject/oop/employee"
 	"testGoProject/oop/manager"
 	"testGoProject/structs/computer"
@@ -29,10 +29,17 @@ func main() {
 	//learn.TryStackOfDefer()
 
 	//error handling example
-	learn.TryErrorHandling()
-	learn.TryDeferAndPanic()
-	learn.TryFirstClassFunction()
-	learn.TryReflectionData()
+	//learn.TryErrorHandling()
+	//learn.TryDeferAndPanic()
+
+
+	//first class function, try reflection
+	//learn.TryFirstClassFunction()
+	//learn.TryReflectionData()
+
+
+	//handle file
+	filehandling.TryFileHandling()
 }
 
 func tryDataFromPackage(){
