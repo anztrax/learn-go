@@ -32,6 +32,7 @@ func main() {
 	learn.TryErrorHandling()
 	learn.TryDeferAndPanic()
 	learn.TryFirstClassFunction()
+	learn.TryReflectionData()
 }
 
 func tryDataFromPackage(){

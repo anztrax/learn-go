@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"reflect"
 	"sync"
 	"time"
 )
@@ -893,6 +894,78 @@ func tryClosureFunc(){
 	fmt.Println(bResult("Everyone"))
 	fmt.Println(aResult("Gopher"))
 	fmt.Println(bResult("!"))
+}
+
+//try reflection in golang
+type order struct{
+	orderId int
+	customerId int
+}
+
+type employee struct{
+	name string
+	id int
+	address string
+	salary int
+	country string
+}
+
+func createQuery(q interface{}){
+	if reflect.ValueOf(q).Kind() == reflect.Struct{
+		t := reflect.TypeOf(q).Name()
+		query := fmt.Sprintf("insert into %s values(",t)
+		v := reflect.ValueOf(q)
+		for i := 0; i < v.NumField(); i++{
+			switch v.Field(i).Kind() {
+				case reflect.Int:
+					if i == 0 {
+						query = fmt.Sprintf("%s%d", query, v.Field(i))
+					} else{
+						query = fmt.Sprintf("%s, %d", query, v.Field(i))
+					}
+				case reflect.String:
+					if i == 0{
+						query = fmt.Sprintf("%s\"%s\"", query, v.Field(i).String())
+					}else{
+						query = fmt.Sprintf("%s, \"%s\"", query, v.Field(i).String())
+					}
+				default:
+					fmt.Println("unsupported type")
+					return
+			}
+		}
+		query = fmt.Sprintf("%s)", query)
+		fmt.Println(query)
+		return
+	}
+	fmt.Println("unsupported type")
+}
+
+func TryReflectionData(){
+	fmt.Println("Try Reflection")
+	fmt.Println("=================")
+	o1 := order{
+		orderId: 1234,
+		customerId: 4567,
+	}
+
+	e1 := employee{
+		country: "indonesia",
+		id: 101,
+		address: "address 1",
+		salary: 10000,
+		name: "name 1",
+	}
+
+	createQuery(o1)
+	createQuery(e1)
+
+	a := 56
+	x := reflect.ValueOf(a).Int()
+	fmt.Printf("Type :%T, value :%v\n", x, x)
+	b := "Naveen"
+	y := reflect.ValueOf(b).String()
+	fmt.Printf("Type :%T, value :%v\n",y,y)
 }
 
 
